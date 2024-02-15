@@ -22,7 +22,7 @@ The proposed neural network architecture is based on an encoder-decoder structur
 The decoder is firstly randomly initialized and then trained using a combination of content and style losses where the content loss is calculated as the Euclidean distance between the AdaIN modified features used to feed the generator and the features of the generated image and the style loss is the sum of the Euclidean distances between the means and variances of the features extracted from the style image and the generated image on various pre-trained VGG-19 layers:
 
 $$
-L_s = \sum_{i=1}^L\Big\|\mu(\phi_i(g)) - \mu(\phi_i(s))\Big\|_2 + \Big\|\sigma(\phi_i(g)) - \sigma(\phi_i(s))\Big\|_2 \ ,
+L_s = \sum_{i=1}^L\|\mu(\phi_i(g)) - \mu(\phi_i(s))\|_2 + \|\sigma(\phi_i(g)) - \sigma(\phi_i(s))\|_2 \ ,
 $$
 
 where $g$ and $s$ refer to generated and style images and each $\phi_i$ denotes a VGG-19 layer
