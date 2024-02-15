@@ -12,11 +12,12 @@ $$
 \text{AdaIN}(x, y) = \sigma(y)\left(\frac{x-\mu(x)}{\sigma(x)} \right) + \mu(y).
 $$
 
+
+The proposed neural network architecture is based on an encoder-decoder structure where encoder is fixed to the initial layers of a pre-trained VGG-19. The network takes a content and an arbitrary style images, encodes them in feature space and feeds extracted feature maps to the AdaIN layer to align their mean and variance. The resulting feature maps are used to generate the target image with the decoder that mostly mirrors encoder architecture.
+
 ![*network architecture*](./images/Screenshot_2024-02-14_at_16.00.09.png)
 
 *network architecture*
-
-The proposed neural network architecture is based on an encoder-decoder structure where encoder is fixed to the initial layers of a pre-trained VGG-19. The network takes a content and an arbitrary style images, encodes them in feature space and feeds extracted feature maps to the AdaIN layer to align their mean and variance. The resulting feature maps are used to generate the target image with the decoder that mostly mirrors encoder architecture.
 
 The decoder is firstly randomly initialized and then trained using a combination of content and style losses where the content loss is calculated as the Euclidean distance between the AdaIN modified features used to feed the generator and the features of the generated image and the style loss is the sum of the Euclidean distances between the means and variances of the features extracted from the style image and the generated image on various pre-trained VGG-19 layers:
 
@@ -32,11 +33,12 @@ The comparison of the obtained results with previous methods shows a slight incr
 
 This paper introduces an idea of style-attentional network (SANet) using attention-based module that incorporates new identity function in addition to the rest for training.
 
+The main contribution was made by proposing style-attentional module that resembles NLP self-attention module and maps the correspondences between the content and style feature maps. Both feature maps are normalized and transformed using different trainable 1x1 convolutions to calculate the attention between them.
+
+
 ![*SANet module*](./images/Screenshot_2024-02-14_at_17.20.41.png)
 
 *SANet module*
-
-The main contribution was made by proposing style-attentional module that resembles NLP self-attention module and maps the correspondences between the content and style feature maps. Both feature maps are normalized and transformed using different trainable 1x1 convolutions to calculate the attention between them.
 
 Network uses two parallel SANet modules that process feature maps extracted by two different pretrained VGG-19 encoder layers. Modules’ outputs are then transformed with 1x1 convolutions, both summed with corresponding content features and combined using upsampled smaller features to be fed into decoder that mostly mirrors VGG encoder.
 
@@ -180,11 +182,12 @@ $$
 
 where $\odot$ denotes the dot production.
 
+
+Three of those AMA blocks are stacked between pre-trained VGG encoder and trainable decoder to gradually fuse style information into content features.
+
 ![*network architecture*](./images/Screenshot_2024-02-15_at_13.06.54.png)
 
 *network architecture*
-
-Three of those AMA blocks are stacked between pre-trained VGG encoder and trainable decoder to gradually fuse style information into content features.
 
 Model is trained using several losses. Image reconstruction loss minimises the difference between original content and style images and the ones that were reconstructed from corresponding VGG features:
 
