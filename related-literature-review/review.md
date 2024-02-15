@@ -22,7 +22,7 @@ The proposed neural network architecture is based on an encoder-decoder structur
 The decoder is firstly randomly initialized and then trained using a combination of content and style losses where the content loss is calculated as the Euclidean distance between the AdaIN modified features used to feed the generator and the features of the generated image and the style loss is the sum of the Euclidean distances between the means and variances of the features extracted from the style image and the generated image on various pre-trained VGG-19 layers:
 
 $$
-L_s = \sum_{i=1}^L\Vert\mu(\phi_i(g)) - \mu(\phi_i(s))\Vert_2 + \|\sigma(\phi_i(g)) - \sigma(\phi_i(s))\|_2 \ ,
+L_s = \sum_{i=1}^L\Vert\mu(\phi_i(g)) - \mu(\phi_i(s))\Vert_2 + \Vert\sigma(\phi_i(g)) - \sigma(\phi_i(s))\Vert_2 \ ,
 $$
 
 where $g$ and $s$ refer to generated and style images and each $\phi_i$ denotes a VGG-19 layer
@@ -47,23 +47,23 @@ Network uses two parallel SANet modules that process feature maps extracted by t
 Loss used to train SANet modules and decoder is a weighted sum of content, style and identity loss. Content loss is the Euclidean distance between the mean–variance channel-wise normalized features of input content image and the generated output image:
 
 $$
-L_c = \sum_{i=1}^2\Big\|\phi_i(I_{cs}) - \phi_i(I_c)\Big\|_2 ,
+L_c = \sum_{i=1}^2\Vert\phi_i(I_{cs}) - \phi_i(I_c)\Vert_2 ,
 $$
 
 where $I_{cs}$ and $I_c$ refer to generated and content images and each $\phi_i$ denotes a VGG-19 layer used in feature extraction before attention modules. The style loss is the sum of the Euclidean distances between the means and variances of the features extracted from the style image and the generated image on various pre-trained VGG-19 layers:
 
 $$
-L_s = \sum_{i=1}^L\Big\|\mu(\phi_i(I_{cs})) - \mu(\phi_i(I_s))\Big\|_2 + \Big\|\sigma(\phi_i(I_{cs})) - \sigma(\phi_i(I_s))\Big\|_2 \ ,
+L_s = \sum_{i=1}^L\Vert\mu(\phi_i(I_{cs})) - \mu(\phi_i(I_s))\Vert_2 + \Vert\sigma(\phi_i(I_{cs})) - \sigma(\phi_i(I_s))\Vert_2 \ ,
 $$
 
 where $I_s$ refers to style image. Identity loss function is proposed as
 
 $$
 L_\text{identity} = \\
-\lambda_1 \Big(\|I_{cc} - I_c\|_2 + \|I_{ss} - I_s\|_2  \Big)
+\lambda_1 (\|I_{cc} - I_c\|_2 + \|I_{ss} - I_s\|_2  )
 + 
 
-\\ \lambda_2 \sum_{i=1}^L \Big(\|\phi_i(I_{cc}) - \phi_i(I_c)\|_2 + \|\phi_i(I_{ss}) - \phi_i(I_s)\|_2  \Big),
+\\ \lambda_2 \sum_{i=1}^L (\|\phi_i(I_{cc}) - \phi_i(I_c)\|_2 + \|\phi_i(I_{ss}) - \phi_i(I_s)\|_2  ),
 
 $$
 
@@ -98,15 +98,15 @@ This paper contributes by presenting AdaAttN module that differs from comparable
 The module, firstly, computes attention map $A$  with content and style features from shallow to deep layers $F^{1:x}_{c}$ and $F^{1:x}_{s}$:
 
 $$
-Q = \text{conv}_{1\times 1}^q\Big(\text{Norm}(F_{c}^{1:x})\Big), \\
-K = \text{conv}_{1\times 1}^k\Big(\text{Norm}(F_{s}^{1:x})\Big), \\
+Q = \text{conv}_{1\times 1}^q(\text{Norm}(F_{c}^{1:x})), \\
+K = \text{conv}_{1\times 1}^k(\text{Norm}(F_{s}^{1:x})), \\
 A = \text{Softmax}(Q^T \times K).\\
 $$
 
 Secondly, calculates attention-weighted mean and standard variance of style features:
 
 $$
-V = \text{conv}_{1\times 1}^v\Big(F_s^x\Big), \\
+V = \text{conv}_{1\times 1}^v(F_s^x), \\
 M = V\times A^T, \\
 S = \sqrt{(V\cdot V)\times A^T - M \cdot M}, \\
 $$
@@ -128,13 +128,13 @@ Three of those AdaAttN modules are integrated into proposed model in the middle 
 Weighted sum of global style loss and local feature loss is used to train both AdaAttN modules and VGG decoder. Global style loss stands for distances of mean and standard deviation between generated image and style image in VGG feature space
 
 $$
-L_{gs} = \sum_{x=2}^5 \Big(\|\mu(E^x(I_{cs})) - \mu(F^x_{s}) \|_2 + \|\sigma(E^x(I_{cs})) - \sigma (F^x_{s}) \|_2 \Big)
+L_{gs} = \sum_{x=2}^5 (\|\mu(E^x(I_{cs})) - \mu(F^x_{s}) \|_2 + \|\sigma(E^x(I_{cs})) - \sigma (F^x_{s}) \|_2 )
 $$
 
 where $E(*)$ denotes feature of the VGG encoder and its superscript $x$ denotes the layer index. Local feature loss is computed using AdaAttN* — parameter-free version of AdaAttN without learnable convolutions kernels, which helps to generate better stylized output for local areas
 
 $$
-L_{ls} = \sum_{x=3}^5 \Big\|E^x(I_{cs}) - \text{AdaAttN}^*(F_c^x, F_s^x, F^{1:x}_c, F^{1:x}_s) \Big\|
+L_{ls} = \sum_{x=3}^5 \VertE^x(I_{cs}) - \text{AdaAttN}^*(F_c^x, F_s^x, F^{1:x}_c, F^{1:x}_s) \Vert
 $$
 
 Image generation results shown in paper are quite convincing and stand out from other methods due to better preserving of content details and less local style attributes.<br/><br/>
@@ -151,7 +151,7 @@ The introduced attentional manifold alignment (AMA) block consists of attention 
 
 $$
 A_{cs}=\text{Softmax}
-\Big(
+(
 
 f(\text{Norm}(F_c))^T
 
@@ -159,10 +159,10 @@ f(\text{Norm}(F_c))^T
 
 g(\text{Norm}(F_s)
 
-\Big), \\
+), \\
 
 \hat{F}_s =
-\theta\Big(
+\theta(
 
 h(\text{Norm}(F_s))^T
 
@@ -170,7 +170,7 @@ h(\text{Norm}(F_s))^T
 
 A_{cs}
 
-\Big),
+),
 $$
 
 where $F_c$ and $F_s$ stands for content and style feature embeddings, $\otimes$  denotes matrix multiplication and $f(\cdot)$, $g(\cdot)$, $h(\cdot)$, $\theta(\cdot)$ stand for 1x1 convolution for feature embeddings. Then goes space-aware interpolation module that adaptively interpolates between content features and rearranged style features by applying convolution kernels of different scale on concatenated features resulting in matrix of weights used in producing final embedding:
@@ -192,7 +192,7 @@ Three of those AMA blocks are stacked between pre-trained VGG encoder and traina
 Model is trained using several losses. Image reconstruction loss minimises the difference between original content and style images and the ones that were reconstructed from corresponding VGG features:
 
 $$
-L_{\text{rec}} = \lambda \Big(\|I_{rc}-I_c\|_2 + \|I_{rs}-I_s\|_2 \Big) +  \sum_{i}\Big(\|\phi_i(I_{rc})-\phi_i(I_c)\|_2 + \|\phi_i(I_{rs})-\phi_i(I_s)\|_2 \Big),
+L_{\text{rec}} = \lambda (\|I_{rc}-I_c\|_2 + \|I_{rs}-I_s\|_2 ) +  \sum_{i}(\|\phi_i(I_{rc})-\phi_i(I_c)\|_2 + \|\phi_i(I_{rs})-\phi_i(I_s)\|_2 ),
 
 $$
 
@@ -201,7 +201,7 @@ where $I_{c}$ and $I_s$ are original content and style images,  $I_{rc}$ and $I_
 To align manifolds gradually and progressively the overall loss function consists of multiple stages where each stage has its own weights for content self-similarity $L_{ss}$ losse and style $L_r$, $L_{m}$ and $L_{h}$ losses:
 
 $$
-L=\sum_{i=1}^3 \Big( \lambda_{ss}^i{L}_{ss} + \lambda_{r}^i{L}_{r}  + \lambda_{m}^i{L}_{m} +\lambda_{h}^i{L}_{h}  \Big) + {L}_{\text{rec}}.
+L=\sum_{i=1}^3 ( \lambda_{ss}^i{L}_{ss} + \lambda_{r}^i{L}_{r}  + \lambda_{m}^i{L}_{m} +\lambda_{h}^i{L}_{h}  ) + {L}_{\text{rec}}.
 $$
 
 The initial value of the content loss weight is relatively high to encourage the manifold structure of the rearranged style features to be the same as content features. In the next stages, the content weight decreases gradually to encourage more vivid style patterns while preserving the relationship between manifolds and rendering the features consistently. Content loss:
